@@ -6,7 +6,7 @@ requires-python = ">= 3.7"
 licence = "GPL 2.0"
 keywords = ["hatch", "packaging"]
 authors = [{ name = "William Smith", email = "williams@citisyn.net" }]
-description = "Time tracking application that can submit timecards to AiM"
+description = "Hatch plugin for building binaries using PyInstaller"
 dynamic = ["version"]
 classifiers = [
     "Development Status :: 4 - Beta",
