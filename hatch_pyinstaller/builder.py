@@ -66,19 +66,18 @@ class PyInstallerConfig(BuilderConfig):
                         ]
                     )
             elif option in path_options_multi:
-                if option in ("add-data", "add-binary"):
-                    src, dst = self.target_config[option].split(":")
-                    value = (
-                        f"{normalize_relative_path(src)}:{normalize_relative_path(dst)}"
-                    )
-                    build_options.extend([f"--{option}", value])
-                else:
-                    build_options.extend(
-                        [
-                            f"--{option}",
-                            normalize_relative_path(self.target_config[option]),
-                        ]
-                    )
+                for value in self.target_config[option]:
+                    if option in ("add-data", "add-binary"):
+                        src, dst = value.split(":")
+                        value = f"{normalize_relative_path(src)}:{normalize_relative_path(dst)}"
+                        build_options.extend([f"--{option}", value])
+                    else:
+                        build_options.extend(
+                            [
+                                f"--{option}",
+                                normalize_relative_path(value),
+                            ]
+                        )
             elif option in other:
                 build_options.extend([f"--{option}", self.target_config[option]])
         return build_options
@@ -97,7 +96,6 @@ class PyInstallerBuilder(BuilderInterface):
     def build_app(self, directory: str, **build_data: Any) -> str:
         project_name = self.normalize_file_name_component(self.metadata.core.raw_name)
         self.target_config["project_name"] = project_name
-
         pyinstaller.run(self.config.pyinstaller_options())
 
         dist_dir = Path(directory, project_name)

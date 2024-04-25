@@ -26,6 +26,9 @@ classifiers = [
     "Topic :: System :: Archiving :: Packaging",
 ]
 
+[project.urls]
+Homepage = "https://github.com/mxysptlk/hatch-pyinstaller"
+
 [project.entry-points.hatch]
 pyinstaller = "hatch_pyinstaller.hooks"
 
