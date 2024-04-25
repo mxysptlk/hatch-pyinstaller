@@ -1,0 +1,37 @@
+
+[project]
+name = "hatch-pyinstaller"
+dependencies = ["hatchling", "PyInstaller"]
+requires-python = ">= 3.7"
+licence = "GPL 2.0"
+keywords = ["hatch", "packaging"]
+authors = [{ name = "William Smith", email = "williams@citisyn.net" }]
+description = "Time tracking application that can submit timecards to AiM"
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Plugins",
+    "Framework :: Hatch",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: System :: Archiving :: Packaging",
+]
+
+[project.entry-points.hatch]
+pyinstaller = "hatch_pyinstaller.hooks"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "hatch_pyinstaller/__init__.py"
