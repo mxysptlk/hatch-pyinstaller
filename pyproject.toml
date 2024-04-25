@@ -4,6 +4,7 @@ name = "hatch-pyinstaller"
 dependencies = ["hatchling", "PyInstaller"]
 requires-python = ">= 3.7"
 licence = "GPL 2.0"
+readme = "README.md"
 keywords = ["hatch", "packaging"]
 authors = [{ name = "William Smith", email = "williams@citisyn.net" }]
 description = "Hatch plugin for building binaries using PyInstaller"
