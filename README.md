@@ -5,11 +5,11 @@
 This is a [Hatch](https://hatch.pypa.io/latest/) plugin that provides
 a custom builder to support building binaries using [PyInstaller](https://pyinstaller.org). Any licence or readme files will be copied to the `dist` directory.
 
-This is something I found useful for building my own personal use apps, and thought I would share. It is offered without waranty or gaurentee of support. I am not a developer or IT professional of any kind. If you find this usefull, and want to take ownership, let me know.
+This is something I found useful for building my own personal use apps, and thought I would share. It is offered without waranty or gaurentee of support. I am not a developer or IT professional of any kind. If you find this usefull, and want to take ownership, let me know. 
 
 ## Usage
 
-Add hatch-pyinstaller to you build dependencies, then add PyInstaller options to `[tool.hatch.build.targets.pyinstaller]`. Yor app's main script can be specified with `scriptname = "myscript.py"`. Otherwise the builder will assume as script with the same name as the project in the project's root directory.
+Add hatch-pyinstaller to your build dependencies, then add PyInstaller options to `[tool.hatch.build.targets.pyinstaller]`. Yor app's main script can be specified with `scriptname = "myscript.py"`. Otherwise the builder will assume as script with the same name as the project in the project's root directory. You will also need to add you project dependencies to the build target dependencies, otherwise PyInstaller won't find them. This is probably fixable, but I'm not sure how.
 
 All valid PyInstaller options should be functional. Options that do not take an argument are added to a flags list: `flags = ["--onedir", "--clean"]`. Options that take an argument have their own entry `log-level = "WARN"`. For options that can be used multiple times use a list of strings for the value: `collect-data = ["some_module", "some_other_module" ]`. For a full list of option, see https://pyinstaller.org/en/stable/usage.html#options.
 
@@ -35,6 +35,7 @@ Project directory:
 [project]
 name = "foo"
 version = "0.1"
+dependencies = ["some_module"]
 
 [build-system]
 requires = [
@@ -44,6 +45,7 @@ requires = [
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.pyinstaller]
+dependencies = ["some_module"]
 flags = ["--clean", "--onedir"]
 collect-submodules = ["bar", "baz"]
 log-level = "WARN"
