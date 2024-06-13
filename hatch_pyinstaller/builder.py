@@ -16,8 +16,8 @@ class PyInstallerConfig(BuilderConfig):
             "upx-dir",
             "specpath",
             "name",
-            "contents-directroy",
-            "paths ",
+            "contents-directory",
+            "paths",
             "icon",
             "splash",
             "upx-exclude",
@@ -55,9 +55,9 @@ class PyInstallerConfig(BuilderConfig):
         for option in self.target_config:
             if option in path_options_single:
                 if option == "paths":
-                    paths = self.target_config[option].split(",")
+                    paths = self.target_config[option].split(":")
                     paths = [p for p in map(normalize_relative_path, paths)]
-                    build_options.extend(["--paths", ",".join(paths)])
+                    build_options.extend(["--paths", ":".join(paths)])
                 else:
                     build_options.extend(
                         [
