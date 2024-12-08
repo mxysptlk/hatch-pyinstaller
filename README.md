@@ -9,9 +9,9 @@ This is something I found useful for building my own personal use apps, and thou
 
 ## Usage
 
-Add hatch-pyinstaller to your build dependencies, then add PyInstaller options to `[tool.hatch.build.targets.pyinstaller]`. Yor app's main script can be specified with `scriptname = "myscript.py"`. Otherwise the builder will assume as script with the same name as the project in the project's root directory. Also, you will need to add `require-runtime-dependencies = true` to the target config or else PyInstaller won't be able to find your imported modules.
+Add hatch-pyinstaller to your build dependencies, then add PyInstaller options to `[tool.hatch.build.targets.pyinstaller]`. Yor app's main script(s) can be specified with `scriptname = "myscript.py"` or `scriptname = ["myscript1.py", "myscript2.py"]` if you have multiple script to build. Otherwise the builder will assume as script with the same name as the project in the project's root directory. Also, you will need to add `require-runtime-dependencies = true` to the target config or else PyInstaller won't be able to find your imported modules.
 
-All valid PyInstaller options should be functional. Options that do not take an argument are added to a flags list: `flags = ["--onedir", "--clean"]`. Options that take an argument have their own entry `log-level = "WARN"`. For options that can be used multiple times use a list of strings for the value: `collect-data = ["some_module", "some_other_module" ]`. For a full list of option, see https://pyinstaller.org/en/stable/usage.html#options.
+All valid PyInstaller options should be functional. You can only define 1 set of options that are applied on all built scripts (= values of `scriptname`). Options that do not take an argument are added to a flags list: `flags = ["--onedir", "--clean"]`. Options that take an argument have their own entry `log-level = "WARN"`. For options that can be used multiple times use a list of strings for the value: `collect-data = ["some_module", "some_other_module" ]`. For a full list of option, see https://pyinstaller.org/en/stable/usage.html#options.
 
 ## Example
 
