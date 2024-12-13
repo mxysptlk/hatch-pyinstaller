@@ -47,10 +47,7 @@ class PyInstallerConfig(BuilderConfig):
             "osx-entitlements-file",
         )
         build_options = []
-        if "scriptname" in self.target_config:
-            build_options.append(self.target_config["scriptname"])
-        else:
-            build_options.append(f"{self.target_config['project_name']}.py")
+        build_options.append("")
         build_options.extend(self.target_config["flags"])
         for option in self.target_config:
             if option in path_options_single:
@@ -96,7 +93,20 @@ class PyInstallerBuilder(BuilderInterface):
     def build_app(self, directory: str, **build_data: Any) -> str:
         project_name = self.normalize_file_name_component(self.metadata.core.raw_name)
         self.target_config["project_name"] = project_name
-        pyinstaller.run(self.config.pyinstaller_options())
+        pyinstaller_options = self.config.pyinstaller_options()
+
+        if "scriptname" in self.target_config:
+            scriptname = self.target_config["scriptname"]
+            if isinstance(scriptname, list):
+                scriptnames = self.target_config["scriptname"]
+            else:
+                scriptnames = [scriptname]
+        else:
+            scriptnames = [f"{self.target_config['project_name']}.py"]
+
+        for scriptname in scriptnames:
+            pyinstaller_options[0] = scriptname
+            pyinstaller.run(pyinstaller_options)
 
         dist_dir = Path(directory, project_name)
         extra_files = []
