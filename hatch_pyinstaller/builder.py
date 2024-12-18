@@ -116,5 +116,5 @@ class PyInstallerBuilder(BuilderInterface):
         if self.metadata.core.license_files:
             extra_files.extend(self.metadata.core.license_files)
         for f in extra_files:
-            shutil.copy2(f, dist_dir)
+            shutil.copy2(f, Path(directory, project_name + '_' + f))
         return os.fspath(dist_dir)
