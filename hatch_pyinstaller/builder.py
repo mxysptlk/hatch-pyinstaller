@@ -5,12 +5,12 @@ from pathlib import Path
 from typing import Any, Callable
 from hatchling.builders.config import BuilderConfig
 from hatchling.builders.plugin.interface import BuilderInterface
-from hatchling.builders.utils import normalize_relative_path
-
 
 class PyInstallerConfig(BuilderConfig):
     def pyinstaller_options(self) -> list[str]:
-        path_options_single = (
+        """ Extract & format pysintaller options from self.target_config
+        """
+        option_names = {
             "distpath",
             "workpath",
             "upx-dir",
@@ -22,8 +22,6 @@ class PyInstallerConfig(BuilderConfig):
             "splash",
             "upx-exclude",
             "runtime-tmpdir",
-        )
-        path_options_multi = (
             "add-data",
             "add-binary",
             "hidden-import",
@@ -36,8 +34,6 @@ class PyInstallerConfig(BuilderConfig):
             "additional-hooks-dir",
             "runtime-hook",
             "exclude-module",
-        )
-        other = (
             "debug",
             "optimize-level",
             "version-file",
@@ -45,38 +41,17 @@ class PyInstallerConfig(BuilderConfig):
             "osx-bundle-identifier",
             "codesign-identity",
             "osx-entitlements-file",
-        )
-        build_options = []
-        build_options.append("")
-        build_options.extend(self.target_config["flags"])
-        for option in self.target_config:
-            if option in path_options_single:
-                if option == "paths":
-                    paths = self.target_config[option].split(":")
-                    paths = [p for p in map(normalize_relative_path, paths)]
-                    build_options.extend(["--paths", ":".join(paths)])
-                else:
-                    build_options.extend(
-                        [
-                            f"--{option}",
-                            normalize_relative_path(self.target_config[option]),
-                        ]
-                    )
-            elif option in path_options_multi:
-                for value in self.target_config[option]:
-                    if option in ("add-data", "add-binary"):
-                        src, dst = value.split(":")
-                        value = f"{normalize_relative_path(src)}:{normalize_relative_path(dst)}"
-                        build_options.extend([f"--{option}", value])
-                    else:
-                        build_options.extend(
-                            [
-                                f"--{option}",
-                                normalize_relative_path(value),
-                            ]
-                        )
-            elif option in other:
-                build_options.extend([f"--{option}", self.target_config[option]])
+        }
+        build_options = [""] # first element of the list will contain the scriptname and is filled in later on
+        build_options.extend(self.target_config["flags"]) # append options with no argument
+        # Append options with arguments
+        for option, values in self.target_config.items():
+            if option in option_names:
+                if not isinstance(values, list):
+                    values = [values]
+
+                for value in values:
+                    build_options.extend([f'--{option}', value])
         return build_options
 
 
