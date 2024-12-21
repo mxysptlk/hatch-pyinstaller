@@ -51,7 +51,7 @@ class PyInstallerConfig(BuilderConfig):
                     values = [values]
 
                 for value in values:
-                    build_options.extend([f'--{option}', value])
+                    build_options.append(f'--{option}={value}')
         return build_options
 
 
