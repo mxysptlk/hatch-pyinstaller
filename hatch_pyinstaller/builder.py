@@ -1,10 +1,13 @@
 import os
 import shutil
-import PyInstaller.__main__ as pyinstaller
+import zipfile
 from pathlib import Path
+import tempfile
+
 from typing import Any, Callable
 from hatchling.builders.config import BuilderConfig
 from hatchling.builders.plugin.interface import BuilderInterface
+import PyInstaller.__main__ as pyinstaller
 
 class PyInstallerConfig(BuilderConfig):
     def pyinstaller_options(self) -> list[str]:
@@ -54,7 +57,6 @@ class PyInstallerConfig(BuilderConfig):
                     build_options.append(f'--{option}={value}')
         return build_options
 
-
 class PyInstallerBuilder(BuilderInterface):
     PLUGIN_NAME = "pyinstaller"
 
@@ -65,19 +67,31 @@ class PyInstallerBuilder(BuilderInterface):
     def get_version_api(self) -> dict[str, Callable[..., Any]]:
         return {"app": self.build_app}
 
-    def build_app(self, directory: str, **build_data: Any) -> str:
+    def build_app(self, directory: str, **_build_data: Any) -> str:
         project_name = self.normalize_file_name_component(self.metadata.core.raw_name)
-        self.target_config["project_name"] = project_name
-        pyinstaller_options = self.config.pyinstaller_options()
 
-        if "scriptname" in self.target_config:
-            scriptname = self.target_config["scriptname"]
-            if isinstance(scriptname, list):
-                scriptnames = self.target_config["scriptname"]
-            else:
-                scriptnames = [scriptname]
+        # extract list of script(s) to build and ensure to have it as a list
+        scriptnames = self.target_config.get("scriptname", f"{project_name}.py")
+        if not isinstance(scriptnames, list):
+            scriptnames = [scriptnames]
+
+        # when zipping, use a temp directory as distpath
+        create_zip = self.target_config.get("zip", False)
+        if create_zip:
+            temp_dir = tempfile.TemporaryDirectory()
+            if "distpath" in self.target_config:
+                print("WARNING: '--distpath' is incompatible with zipping bundles. It is ignored.")
+            self.target_config["distpath"] = temp_dir.name
         else:
-            scriptnames = [f"{self.target_config['project_name']}.py"]
+            # if --distpath is not defined, force it to hatch's dist path instead of using pyinstaller default.
+            self.target_config["distpath"] = self.target_config.get("distpath", directory)
+
+        if len(scriptnames) > 1 and "name" in self.target_config:
+            print("WARNING: '--name' is incompatible with bundling multiple scriptnames. It is ignored.")
+            self.target_config.pop("name")
+
+        # Construct pyinstaller arguments - to do only once all coherency checks are done
+        pyinstaller_options = self.config.pyinstaller_options()
 
         for scriptname in scriptnames:
             pyinstaller_options[0] = scriptname
@@ -85,11 +99,24 @@ class PyInstallerBuilder(BuilderInterface):
 
         dist_dir = Path(directory, project_name)
         extra_files = []
-
         if self.metadata.core.readme_path:
             extra_files.append(self.metadata.core.readme_path)
         if self.metadata.core.license_files:
             extra_files.extend(self.metadata.core.license_files)
-        for f in extra_files:
-            shutil.copy2(f, Path(directory, project_name + '_' + f))
+
+        if not create_zip:
+            for f in extra_files:
+                shutil.copy2(f, dist_dir.parent / f'{dist_dir.name}_{f}')
+        else:
+            # zip is located in hatch dist, zip name mimics wheel & sdist naming rules
+            dist_dir = dist_dir.parent / f'{dist_dir.name}-{self.metadata.version}.bin.zip'
+            with zipfile.ZipFile(dist_dir, 'w', zipfile.ZIP_DEFLATED) as zf:
+                for root, _dirs, files in os.walk(Path(temp_dir.name), topdown = False):
+                    for name in files:
+                        zipped_file = Path(root, name)
+                        zf.write(zipped_file, zipped_file.relative_to(temp_dir.name))
+
+                for f in extra_files:
+                    zf.write(f, Path(f).name)
+
         return os.fspath(dist_dir)
