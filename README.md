@@ -20,8 +20,7 @@ Zip file is created in hatch \<dist\> folder, named as per standard naming conve
 
 Compatibility warnings:  
 `--name` option cannot be defined if several scripts are to be built.  
-`--distpath` option cannot be defined if built scripts are bundled in a zip file.  
-If any occurs, the option is ignored and a warning message is displayed.
+If this occurs, the option is ignored and a warning message is displayed.
 
 ## Example
 
