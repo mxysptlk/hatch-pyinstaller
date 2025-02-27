@@ -75,16 +75,19 @@ class PyInstallerBuilder(BuilderInterface):
         if not isinstance(scriptnames, list):
             scriptnames = [scriptnames]
 
-        # when zipping, use a temp directory as distpath
+        # dist dir can be hatch's dist path or pyinstaller option distpath.
+        dist_dir = Path(self.target_config.get("distpath", directory))
+        dist_dir.mkdir(parents = True, exist_ok = True)
+        dist_dir /= project_name
+
+        # update <distpath> in function of zip option.
+        # when zipping, use a temp directory
         create_zip = self.target_config.get("zip", False)
         if create_zip:
             temp_dir = tempfile.TemporaryDirectory()
-            if "distpath" in self.target_config:
-                print("WARNING: '--distpath' is incompatible with zipping bundles. It is ignored.")
             self.target_config["distpath"] = temp_dir.name
         else:
-            # if --distpath is not defined, force it to hatch's dist path instead of using pyinstaller default.
-            self.target_config["distpath"] = self.target_config.get("distpath", directory)
+            self.target_config["distpath"] = str(dist_dir)
 
         if len(scriptnames) > 1 and "name" in self.target_config:
             print("WARNING: '--name' is incompatible with bundling multiple scriptnames. It is ignored.")
@@ -97,7 +100,6 @@ class PyInstallerBuilder(BuilderInterface):
             pyinstaller_options[0] = scriptname
             pyinstaller.run(pyinstaller_options)
 
-        dist_dir = Path(directory, project_name)
         extra_files = []
         if self.metadata.core.readme_path:
             extra_files.append(self.metadata.core.readme_path)
